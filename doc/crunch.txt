@@ -78,7 +78,13 @@ Or when you enter a floating point number like this:
 A decimal without a leading zero produces an error when you actually wanted
 was this 0.5/2 = 0.25
 
-Crunch solves these trivial problems and many more.
+Crunch solves these trivial problems and many more. If qalculate [0] is
+installed on your system and g:crunch_calc is set, Crunch will use it to
+evaluate expressions, offering a much richer syntax (for example, currency and
+unit conversions). If not, Crunch will use Vim's floating point
+library to evaluate expressions.
+
+[0] http://qalculate.github.io/
 
 
 ==============================================================================
@@ -333,6 +339,23 @@ specifier %g. The Maximum precision depends on the precision of the floating
 point library used when compiling vim, see |floating-point-precision| for
 details. Note that trailing 0s in results are removed.
 
+------------------------------------------------------------------------------
+4.6 g:crunch_calc                                           *crunch-calc*
+
+Default 0
+
+Controls whether or not Crunch uses qalculate to evaluate expressions. If
+qalculate is not installed or g:crunch_calc is set to 0, Crunch will use Vim's
+floating point library to evaluate expressions.
+
+Disabled for backwards compatiblity due to differing Syntaxes for Qalculate
+and Vim. For example to cube 2 in Qalculate, use
+
+    2^3 or 2**3,
+
+whereas Vim expects
+
+    pow(2,3).
 
 ==============================================================================
 5. KNOWN ISSUES                                         *crunch-known-issues*

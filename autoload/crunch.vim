@@ -70,6 +70,7 @@ function! crunch#cmd_line_crunch(user_input) abort "{{{2
     endtry
 endfunction "}}}2
 
+if executable('qalc') && get(g:,'crunch_qalc', 0) | let s:crunch_qalc = 1 | endif
 
 function! crunch#eval(exprs) abort "{{{2
     " Takes string of mathematical expressions delimited by new lines
@@ -82,30 +83,41 @@ function! crunch#eval(exprs) abort "{{{2
 "    Decho 'expr_list = <'.string(expr_list).'>'
 
     for i in range(len(expr_list))
-        try
-            let orig_line = expr_list[i]
-            let expr_list[i] = s:crunch_init(expr_list[i])
+        if empty(trim(expr_list[i])) | continue | endif
+        if s:crunch_qalc
+            let precision = str2nr(g:crunch_precision)
+            try
+                let expr_list[i] .= ' = '..trim(system('qalc -terse -set "ignore locale yes" -set "show ending zeroes on" -set "precision '..precision..'" '..shellescape(expr_list[i])))
+            catch
+                if v:shell_error | call s:echo_error('Qalculate returned error '..v:shell_error..', undoing changes') | undo | endif
+                let expr_list[i] .= ' = '..'Qalculate returned error '..v:shell_error
+            endtry
+        else
+            try
+                let orig_line = expr_list[i]
+                let expr_list[i] = s:crunch_init(expr_list[i])
 
-            if s:valid_line(expr_list[i]) == 0
-                call s:capture_variable(expr_list[i])
-                let expr_list[i] = orig_line
-                continue
-            endif
+                if s:valid_line(expr_list[i]) == 0
+                    call s:capture_variable(expr_list[i])
+                    let expr_list[i] = orig_line
+                    continue
+                endif
 
-            " preserve the expression without an old result
-            let expr_list[i] = s:remove_old_result(expr_list[i])
-            let orig_expr = expr_list[i]
+                " preserve the expression without an old result
+                let expr_list[i] = s:remove_old_result(expr_list[i])
+                let orig_expr = expr_list[i]
 
-            let expr_list[i] = s:mark_e_notation(expr_list[i])
-            let expr_list[i] = s:replace_captured_variable_with_value(expr_list[i])
-            let expr_list[i] = s:replace_searched_variable_with_value(expr_list[i])
-            let expr_list[i] = s:unmark_e_notation(expr_list[i])
-            let result  = crunch#core(expr_list[i])
-        catch /Crunch error: /
-            call s:echo_error(v:exception)
-            let result= v:exception
-        endtry
-        let expr_list[i] = s:build_result(orig_expr, result)
+                let expr_list[i] = s:mark_e_notation(expr_list[i])
+                let expr_list[i] = s:replace_captured_variable_with_value(expr_list[i])
+                let expr_list[i] = s:replace_searched_variable_with_value(expr_list[i])
+                let expr_list[i] = s:unmark_e_notation(expr_list[i])
+                let result  = crunch#core(expr_list[i])
+            catch /Crunch error: /
+                call s:echo_error(v:exception)
+                let result= v:exception
+            endtry
+            let expr_list[i] = s:build_result(orig_expr, result)
+        endif
     endfor
 "    Decho string(expr_list).'= the expr_lines_list'
     let expr_lines = join(expr_list, "\n")

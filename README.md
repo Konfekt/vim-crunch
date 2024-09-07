@@ -3,7 +3,10 @@ crunch
 
 crunch makes calculations in Vim more accessible by providing an operator to
 evaluate mathematical expressions, loosening Vim's math syntax, and forcing
-integers into floating point numbers.
+integers into floating point numbers. If
+[qalculate](http://qalculate.github.io/) is installed on your system, then
+Crunch can use it to evaluate expressions, offering a much richer syntax (for
+example, currency and unit conversions).
 
 Usage
 -----
