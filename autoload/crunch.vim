@@ -87,7 +87,7 @@ function! crunch#eval(exprs) abort "{{{2
         if s:crunch_qalc
             let precision = str2nr(g:crunch_precision)
             try
-                let expr_list[i] .= ' = '..trim(system('qalc -terse -set "ignore locale yes" -set "show ending zeroes on" -set "precision '..precision..'" '..shellescape(expr_list[i])))
+                let expr_list[i] .= ' = '..trim(system('qalc -terse -set "precision '..precision..'" '..shellescape(expr_list[i])))
             catch
                 if v:shell_error | call s:echo_error('Qalculate returned error '..v:shell_error..', undoing changes') | undo | endif
                 let expr_list[i] .= ' = '..'Qalculate returned error '..v:shell_error
